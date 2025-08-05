@@ -92,17 +92,17 @@ def render_card(title, value):
     <div style='
         background-color:white;
         padding:20px;
-        margin-bottom:20px;
+        margin:10px;
         border:1px solid #ccc;
         box-shadow:0px 2px 4px rgba(0,0,0,0.1);
         border-radius:8px;
         text-align:center;
     '>
-        <h4>{title}</h4>
+        <h4 style='margin-bottom:10px'>{title}</h4>
         <h1>{value}</h1>
     </div>
     """
-    components.html(html, height=150)
+    components.html(html, height=170)
 
 st.write("\n")
 col1, col2, col3 = st.columns(3)
@@ -116,53 +116,51 @@ with col2:
 with col3:
     render_card("Available Licenses", 34)
 
-col4, col5 = st.columns(2)
+# 세 개의 개별 위젯으로 User Stats 구성
+col4, col5, col6 = st.columns(3)
 
 with col4:
-    components.html("""
+    render_card("Active Users", 87)
+
+with col5:
+    render_card("Inactive Users", 13)
+
+with col6:
+    render_card("New Users (This Month)", 7)
+
+# 차트 위젯 통합
+with st.container():
+    buf = io.BytesIO()
+    departments = ["Finance", "HR", "IT", "Sales"]
+    counts = [30, 20, 45, 33]
+    fig, ax = plt.subplots()
+    ax.bar(departments, counts)
+    ax.set_ylabel("Licenses")
+    fig.tight_layout()
+    fig.savefig(buf, format="png")
+    chart_html = f"""
     <div style='
         background-color:white;
         padding:20px;
+        margin:10px;
         border:1px solid #ccc;
         box-shadow:0px 2px 4px rgba(0,0,0,0.1);
         border-radius:8px;
+        text-align:center;
     '>
-        <h4>User Stats</h4>
-        <ul style='list-style:none; padding-left:0; text-align:left;'>
-            <li><b>Active Users:</b> 87</li>
-            <li><b>Inactive Users:</b> 13</li>
-            <li><b>New Users (This Month):</b> 7</li>
-        </ul>
+        <h4 style='margin-bottom:10px'>License by Department</h4>
+        <img src='data:image/png;base64,{buf.getvalue().decode("latin1")}'>
     </div>
-    """, height=180)
+    """
+    components.html(chart_html, height=400)
 
-with col5:
-    with st.container():
-        st.markdown("""
-        <div style='
-            background-color:white;
-            padding:20px;
-            border:1px solid #ccc;
-            box-shadow:0px 2px 4px rgba(0,0,0,0.1);
-            border-radius:8px;
-        '>
-        <h4>License by Department</h4>
-        """, unsafe_allow_html=True)
-        departments = ["Finance", "HR", "IT", "Sales"]
-        counts = [30, 20, 45, 33]
-        fig, ax = plt.subplots()
-        ax.bar(departments, counts)
-        ax.set_ylabel("Licenses")
-        buf = io.BytesIO()
-        fig.savefig(buf, format="png")
-        st.image(buf)
-        st.markdown("</div>", unsafe_allow_html=True)
-
+# 테이블 위젯 통합
 with st.container():
     st.markdown("""
     <div style='
         background-color:white;
         padding:20px;
+        margin:10px;
         border:1px solid #ccc;
         box-shadow:0px 2px 4px rgba(0,0,0,0.1);
         border-radius:8px;
