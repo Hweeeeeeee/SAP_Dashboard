@@ -88,6 +88,7 @@ st.markdown("""
 /* KPI 카드 스타일 */
 .kpi-cards {
     display: flex;
+    flex-direction: row;  /* 가로 정렬 */
     gap: 1.5rem;
 }
 
@@ -214,3 +215,4 @@ st.markdown('<div class="widget">', unsafe_allow_html=True)
 st.markdown('<div class="section-title">License Table</div>', unsafe_allow_html=True)
 st.dataframe(df, use_container_width=True)
 st.markdown("</div>", unsafe_allow_html=True)
+
