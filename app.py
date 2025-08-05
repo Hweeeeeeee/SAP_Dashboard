@@ -181,7 +181,7 @@ kpi_cards_html = '''
     pending=df[df['Status']=='Pending'].shape[0]
 )
 
-#st.markdown(kpi_cards_html, unsafe_allow_html=True)
+st.markdown(kpi_cards_html, unsafe_allow_html=True)
 st.markdown("</div>", unsafe_allow_html=True)  # widget 닫기
 
 # --- Overview 차트 영역 ---
@@ -223,6 +223,7 @@ st.markdown("</div>", unsafe_allow_html=True)
 st.markdown('<div class="section-title">License Table</div>', unsafe_allow_html=True)
 st.dataframe(df, use_container_width=True)
 st.markdown("</div>", unsafe_allow_html=True)
+
 
 
 
