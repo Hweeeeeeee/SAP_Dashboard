@@ -12,7 +12,7 @@ st.markdown("""
     padding-top: 1rem;
     padding-left: 2rem;
     padding-right: 2rem;
-    background-color: #f5f6f8;
+    background-color: #dbdbdb;
     min-height: 100vh;
 }
 
@@ -223,6 +223,7 @@ st.markdown("</div>", unsafe_allow_html=True)
 st.markdown('<div class="section-title">License Table</div>', unsafe_allow_html=True)
 st.dataframe(df, use_container_width=True)
 st.markdown("</div>", unsafe_allow_html=True)
+
 
 
 
