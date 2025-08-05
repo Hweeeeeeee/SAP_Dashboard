@@ -4,7 +4,7 @@ import plotly.express as px
 
 st.set_page_config(page_title="FUE License Management", layout="wide")
 
-# --- 스타일 전체 적용 ---
+# --- CSS 스타일 ---
 st.markdown("""
 <style>
 /* 전체 배경 연한 회색 */
@@ -29,7 +29,7 @@ st.markdown("""
     box-shadow: 0 2px 4px rgb(0 0 0 / 0.1);
 }
 
-/* SAP 로고 느낌 텍스트 스타일 (간단히 텍스트로 대체) */
+/* SAP 로고 느낌 텍스트 (간단 텍스트로 대체) */
 .topbar .sap-logo {
     font-weight: 900;
     margin-right: 12px;
@@ -85,15 +85,16 @@ st.markdown("""
     margin-bottom: 2rem;
 }
 
-/* KPI 카드 스타일 */
+/* KPI 카드 컨테이너 - 가로 정렬 */
 .kpi-cards {
     display: flex;
-    flex-direction: row;  /* 가로 정렬 */
+    flex-direction: row;
     gap: 1.5rem;
 }
 
+/* KPI 카드 */
 .kpi-card {
-    flex: 1;
+    flex: 1; /* 균등 폭 */
     background-color: white;
     border: 1px solid #d4d7db;
     border-radius: 8px;
@@ -123,11 +124,10 @@ st.markdown("""
     margin-bottom: 1rem;
     color: #222;
 }
-
 </style>
 """, unsafe_allow_html=True)
 
-# --- 상단 타이틀바 (SAP 로고 텍스트 대체) ---
+# --- 상단 타이틀바 ---
 st.markdown("""
 <div class="topbar">
     <div class="sap-logo">SAP</div>
@@ -152,7 +152,7 @@ def load_data():
 
 df = load_data()
 
-# --- KPI 카드 영역 (widget) ---
+# --- KPI 카드 영역 (가로 정렬된 flex container) ---
 st.markdown('<div class="widget">', unsafe_allow_html=True)
 st.markdown('<div class="kpi-cards">', unsafe_allow_html=True)
 
@@ -171,14 +171,13 @@ kpi_html += kpi_card("Expired", df[df['Status']=='Expired'].shape[0])
 kpi_html += kpi_card("Pending", df[df['Status']=='Pending'].shape[0])
 
 st.markdown(kpi_html, unsafe_allow_html=True)
-st.markdown("</div>", unsafe_allow_html=True)
-st.markdown("</div>", unsafe_allow_html=True)
+st.markdown("</div>", unsafe_allow_html=True)  # kpi-cards 닫기
+st.markdown("</div>", unsafe_allow_html=True)  # widget 닫기
 
-# --- Overview 차트 영역 (widget) ---
+# --- Overview 차트 영역 ---
 st.markdown('<div class="widget">', unsafe_allow_html=True)
 st.markdown('<div class="section-title">Overview - License Status</div>', unsafe_allow_html=True)
 
-# 원형 차트
 status_counts = df["Status"].value_counts().reset_index()
 status_counts.columns = ["Status", "Count"]
 
@@ -189,7 +188,6 @@ fig_pie = px.pie(status_counts, names="Status", values="Count", hole=0.35,
                      "Pending": "#f0ad4e"
                  })
 
-# 막대 차트
 fig_bar = px.bar(status_counts, x="Status", y="Count", 
                  color="Status",
                  color_discrete_map={
@@ -210,9 +208,8 @@ with col2:
 
 st.markdown("</div>", unsafe_allow_html=True)
 
-# --- License Table 영역 (widget) ---
+# --- License Table 영역 ---
 st.markdown('<div class="widget">', unsafe_allow_html=True)
 st.markdown('<div class="section-title">License Table</div>', unsafe_allow_html=True)
 st.dataframe(df, use_container_width=True)
 st.markdown("</div>", unsafe_allow_html=True)
-
