@@ -4,68 +4,121 @@ import plotly.express as px
 
 st.set_page_config(page_title="FUE License Management", layout="wide")
 
-# --- CSS 스타일 (어두운 톤, 카드 스타일) ---
+# --- CSS 스타일 ---
 st.markdown("""
 <style>
-/* 페이지 배경과 텍스트 */
-[data-testid="stAppViewContainer"] {
-    background-color: #121212;
-    color: #e0e0e0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-/* 사이드바 배경 및 텍스트 */
-[data-testid="stSidebar"] {
-    background-color: #1f2937;
-    color: #e0e0e0;
-    padding-top: 2rem;
-    font-weight: 600;
-}
-
-/* 사이드바 메뉴 아이템 */
-.sidebar .sidebar-content > div {
-    margin-bottom: 1rem;
-}
-
-.sidebar .sidebar-content div.stRadio > label {
-    color: #cbd5e1;
-    font-weight: 600;
-}
-
-.sidebar .sidebar-content div.stRadio > label:hover {
-    color: #3b82f6;
-}
-
-/* 본문 영역 여백 */
+/* 전체 배경 밝은 회색 */
 .main > div.block-container {
-    padding-left: 2rem;
-    padding-right: 2rem;
-    padding-top: 1rem;
+    padding: 1.5rem 2rem;
+    background-color: #f3f2f1;
+    min-height: 100vh;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    color: #323130;
 }
 
-/* 카드 공통 스타일 */
-.card {
-    background-color: #1e293b;
-    padding: 1.5rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-    color: #e0e0e0;
-    text-align: center;
-}
-
-/* 카드 제목 */
-.card h3 {
-    margin-bottom: 0.5rem;
+/* 상단 타이틀바 */
+.topbar {
+    background-color: white;
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
     font-weight: 700;
-    color: #60a5fa;
+    font-size: 24px;
+    color: #0078d4; /* MS 블루 */
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
 }
 
-/* 카드 숫자 */
-.card p {
+/* SAP 로고 느낌 텍스트 */
+.topbar .sap-logo {
+    font-weight: 900;
+    margin-right: 12px;
+    color: #0078d4;
+    font-size: 28px;
+}
+
+/* 메뉴바 */
+.menubar {
+    background-color: white;
+    padding-left: 2rem;
+    padding-top: 0.5rem;
+    display: flex;
+    gap: 2rem;
+    font-weight: 600;
+    font-size: 16px;
+    border-bottom: 1px solid #e1dfdd;
+}
+
+/* 메뉴 아이템 기본 */
+.menubar .menu-item {
+    padding-bottom: 0.5rem;
+    color: #605e5c;
+    cursor: pointer;
+    position: relative;
+}
+
+/* 현재 활성화된 메뉴 스타일 */
+.menubar .menu-item.active {
+    color: #0078d4;
+    font-weight: 700;
+}
+
+/* 활성화 메뉴 밑 파란 언더라인 */
+.menubar .menu-item.active::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: #0078d4;
+    border-radius: 3px 3px 0 0;
+}
+
+/* 위젯 박스 스타일 */
+.widget {
+    background-color: white;
+    padding: 1.5rem;
+    border: 1px solid #e1dfdd;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 0.05);
+    margin-bottom: 1.8rem;
+}
+
+/* KPI 카드 컨테이너 - 가로 정렬 */
+.kpi-cards {
+    display: flex;
+    flex-direction: row;
+    gap: 1.5rem;
+}
+
+/* KPI 카드 */
+.kpi-card {
+    flex: 1;
+    background-color: white;
+    border: 1px solid #e1dfdd;
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    text-align: center;
+    box-shadow: 0 2px 6px rgb(0 0 0 / 0.04);
+    transition: box-shadow 0.3s ease;
+}
+
+.kpi-card:hover {
+    box-shadow: 0 6px 15px rgb(0 0 0 / 0.15);
+}
+
+.kpi-card h3 {
+    margin-bottom: 0.4rem;
+    font-weight: 600;
+    color: #323130;
+    font-size: 18px;
+}
+
+.kpi-card p {
+    margin: 0;
     font-size: 28px;
     font-weight: 700;
-    margin: 0;
-    color: #3b82f6;
+    color: #0078d4;
 }
 
 /* 섹션 제목 */
@@ -73,31 +126,46 @@ st.markdown("""
     font-weight: 700;
     font-size: 22px;
     margin-bottom: 1rem;
-    color: #93c5fd;
+    color: #323130;
 }
 
-/* Plotly 차트 배경 및 텍스트 맞춤 */
+/* Plotly 차트 배경 및 폰트 색상 */
 .js-plotly-plot .main-svg {
-    background-color: #1e293b !important;
+    background-color: white !important;
 }
 
+/* 테이블 스타일은 Streamlit 기본 유지 */
 </style>
 """, unsafe_allow_html=True)
 
-# --- 사이드바 ---
-with st.sidebar:
-    st.markdown("# 🚀 FUE License")
-    menu = st.radio("Menu", ["Home", "FUE License", "User", "My Account"])
+# --- 상단 타이틀바 ---
+st.markdown("""
+<div class="topbar">
+    <div class="sap-logo">SAP</div>
+    FUE License Management
+</div>
+""", unsafe_allow_html=True)
 
-    st.markdown("---")
-    st.markdown("### User Profile")
-    st.write("Jane Doe")
-    st.write("jane.doe@example.com")
+# --- 메뉴바 ---
+menu_items = ["Home", "FUE License", "User", "My Account"]
+selected_menu = st.session_state.get("selected_menu", "Home")
+
+def set_menu(item):
+    st.session_state.selected_menu = item
+
+cols = st.columns(len(menu_items))
+for i, item in enumerate(menu_items):
+    is_active = (item == selected_menu)
+    label_html = f'<div class="menu-item{" active" if is_active else ""}">{item}</div>'
+    if cols[i].button(item, key=f"menu_{i}"):
+        set_menu(item)
+        st.experimental_rerun()
+    cols[i].markdown(label_html, unsafe_allow_html=True)
 
 # --- 데이터 로드 ---
 @st.cache_data
 def load_data():
-    # Figma 기반 예시 데이터 구조
+    # Figma 참고 데이터 (예시)
     data = {
         "LicenseID": [1,2,3,4,5,6,7,8,9,10],
         "User": ["Alice","Bob","Carol","David","Eve","Frank","Grace","Hank","Ivy","Jack"],
@@ -110,78 +178,70 @@ def load_data():
 df = load_data()
 
 # --- 본문 ---
-st.title(f"FUE License Management - {menu}")
-
-if menu == "Home":
+if selected_menu == "Home":
     # KPI 카드 4개 가로 배치
-    col1, col2, col3, col4 = st.columns(4, gap="large")
-    with col1:
-        st.markdown(f'''
-        <div class="card">
+    st.markdown('<div class="widget">', unsafe_allow_html=True)
+
+    kpi_html = f'''
+    <div class="kpi-cards">
+        <div class="kpi-card">
             <h3>Total Licenses</h3>
             <p>{len(df)}</p>
         </div>
-        ''', unsafe_allow_html=True)
-    with col2:
-        st.markdown(f'''
-        <div class="card">
+        <div class="kpi-card">
             <h3>Active</h3>
-            <p>{df[df['Status'] == 'Active'].shape[0]}</p>
+            <p>{df[df['Status']=="Active"].shape[0]}</p>
         </div>
-        ''', unsafe_allow_html=True)
-    with col3:
-        st.markdown(f'''
-        <div class="card">
+        <div class="kpi-card">
             <h3>Expired</h3>
-            <p>{df[df['Status'] == 'Expired'].shape[0]}</p>
+            <p>{df[df['Status']=="Expired"].shape[0]}</p>
         </div>
-        ''', unsafe_allow_html=True)
-    with col4:
-        st.markdown(f'''
-        <div class="card">
+        <div class="kpi-card">
             <h3>Pending</h3>
-            <p>{df[df['Status'] == 'Pending'].shape[0]}</p>
+            <p>{df[df['Status']=="Pending"].shape[0]}</p>
         </div>
-        ''', unsafe_allow_html=True)
+    </div>
+    '''
+    st.markdown(kpi_html, unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown("---")
-
+    st.markdown('<div class="widget">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">Overview - License Status</div>', unsafe_allow_html=True)
-    status_counts = df['Status'].value_counts().reset_index()
-    status_counts.columns = ['Status', 'Count']
 
-    # 원형 차트
-    fig_pie = px.pie(status_counts, names='Status', values='Count', hole=0.5,
+    status_counts = df["Status"].value_counts().reset_index()
+    status_counts.columns = ["Status", "Count"]
+
+    fig_pie = px.pie(status_counts, names="Status", values="Count", hole=0.35,
                      color_discrete_map={
-                         "Active": "#3b82f6",
-                         "Expired": "#ef4444",
-                         "Pending": "#fbbf24"
+                         "Active": "#0078d4",
+                         "Expired": "#d13438",
+                         "Pending": "#ffb900"
                      })
 
-    # 막대 차트
-    fig_bar = px.bar(status_counts, x='Status', y='Count', color='Status',
+    fig_bar = px.bar(status_counts, x="Status", y="Count", color="Status",
                      color_discrete_map={
-                         "Active": "#3b82f6",
-                         "Expired": "#ef4444",
-                         "Pending": "#fbbf24"
+                         "Active": "#0078d4",
+                         "Expired": "#d13438",
+                         "Pending": "#ffb900"
                      },
-                     text='Count')
+                     text="Count")
     fig_bar.update_traces(textposition='outside')
-    fig_bar.update_layout(yaxis_title='Count', xaxis_title='Status', showlegend=False,
-                          plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-                          font_color='#e0e0e0')
+    fig_bar.update_layout(yaxis_title="Count", xaxis_title="Status", showlegend=False,
+                          plot_bgcolor='white', paper_bgcolor='white',
+                          font_color='#323130')
 
-    col1, col2 = st.columns(2)
-    with col1:
+    c1, c2 = st.columns(2)
+    with c1:
         st.plotly_chart(fig_pie, use_container_width=True)
-    with col2:
+    with c2:
         st.plotly_chart(fig_bar, use_container_width=True)
 
-    st.markdown("---")
+    st.markdown("</div>", unsafe_allow_html=True)
 
+    st.markdown('<div class="widget">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">License Table</div>', unsafe_allow_html=True)
     st.dataframe(df, use_container_width=True)
+    st.markdown("</div>", unsafe_allow_html=True)
 
 else:
-    st.info("This menu content is under construction.")
-
+    st.markdown(f'<div class="widget"><h2>{selected_menu} 페이지 준비중입니다.</h2></div>', unsafe_allow_html=True)
