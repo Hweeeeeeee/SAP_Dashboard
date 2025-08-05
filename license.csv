@@ -2,4 +2,5 @@ User Name,Email,Product,Status,Issued Date,Expiry Date
 Kim Hwi-young,hwi@example.com,SAP S/4HANA,Active,2023-07-01,2024-07-01
 Lee Jisoo,jisoo@example.com,SAP BTP,Expired,2022-06-01,2023-06-01
 Park Minseo,minseo@example.com,SAP SuccessFactors,Pending,2024-01-15,2025-01-15
-...
+Choi Hana,hana@example.com,SAP S/4HANA,Active,2023-03-10,2024-03-10
+Jung Woojin,woojin@example.com,SAP BTP,Active,2023-10-25,2024-10-25
