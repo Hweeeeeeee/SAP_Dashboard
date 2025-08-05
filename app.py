@@ -152,7 +152,7 @@ def load_data():
 
 df = load_data()
 
-st.markdown('<div class="widget">', unsafe_allow_html=True)
+# st.markdown('<div class="widget">', unsafe_allow_html=True)
 
 # 4개 카드 한꺼번에 담긴 flex 컨테이너
 kpi_cards_html = '''
@@ -223,5 +223,6 @@ st.markdown('<div class="widget">', unsafe_allow_html=True)
 st.markdown('<div class="section-title">License Table</div>', unsafe_allow_html=True)
 st.dataframe(df, use_container_width=True)
 st.markdown("</div>", unsafe_allow_html=True)
+
 
 
