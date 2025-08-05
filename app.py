@@ -1,20 +1,17 @@
 import streamlit as st
-from PIL import Image
 import pandas as pd
 import matplotlib.pyplot as plt
 from streamlit_option_menu import option_menu
-import streamlit.components.v1 as components
 import io
-import base64
 
-# 기본 페이지 설정
+# 페이지 설정
 st.set_page_config(
     page_title="FUE License Management",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# CSS 스타일 추가
+# CSS 스타일
 st.markdown("""
     <style>
         .title-bar {
@@ -45,10 +42,26 @@ st.markdown("""
         .stApp {
             background-color: #f8f9fa;
         }
+        /* 카드 공통 스타일 */
+        .card {
+            background-color: white;
+            padding: 20px;
+            margin: 10px;
+            border: 1px solid #ccc;
+            box-shadow: 0px 2px 4px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            text-align: center;
+        }
+        .card h4 {
+            margin-bottom: 10px;
+        }
+        .card h1 {
+            margin: 0;
+        }
     </style>
 """, unsafe_allow_html=True)
 
-# 타이틀바 영역
+# 타이틀바
 st.markdown(
     '<div class="title-bar">'
     '<div class="title-bar-left">'
@@ -89,27 +102,14 @@ selected = option_menu(
     }
 )
 
-# 카드 출력 함수 (높이 늘리고 flex로 중앙정렬 적용)
+# 카드 출력 함수 (components.html 사용 안함)
 def render_card(title, value):
-    html = f"""
-    <div style='
-        background-color:white;
-        padding:20px;
-        margin:10px;
-        border:1px solid #ccc;
-        box-shadow:0px 2px 4px rgba(0,0,0,0.1);
-        border-radius:8px;
-        text-align:center;
-        height: 180px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    '>
-        <h4 style='margin-bottom:10px'>{title}</h4>
-        <h1>{value}</h1>
-    </div>
-    """
-    components.html(html, height=200)
+    st.markdown(f"""
+        <div class="card">
+            <h4>{title}</h4>
+            <h1>{value}</h1>
+        </div>
+        """, unsafe_allow_html=True)
 
 st.write("\n")
 col1, col2, col3 = st.columns(3)
@@ -128,55 +128,27 @@ with col5:
 with col6:
     render_card("New Users (This Month)", 7)
 
-# License by Department 차트 위젯
-with st.container():
-    buf = io.BytesIO()
-    departments = ["Finance", "HR", "IT", "Sales"]
-    counts = [30, 20, 45, 33]
-    fig, ax = plt.subplots()
-    ax.bar(departments, counts)
-    ax.set_ylabel("Licenses")
-    fig.tight_layout()
-    fig.savefig(buf, format="png")
-    plt.close(fig)
-    buf.seek(0)
-    img_base64 = base64.b64encode(buf.read()).decode()
+# License by Department 차트
+departments = ["Finance", "HR", "IT", "Sales"]
+counts = [30, 20, 45, 33]
+fig, ax = plt.subplots()
+ax.bar(departments, counts)
+ax.set_ylabel("Licenses")
+fig.tight_layout()
 
-    chart_html = f"""
-    <div style='
-        background-color:white;
-        padding:20px;
-        margin:10px;
-        border:1px solid #ccc;
-        box-shadow:0px 2px 4px rgba(0,0,0,0.1);
-        border-radius:8px;
-        text-align:center;
-    '>
-        <h4 style='margin-bottom:10px'>License by Department</h4>
-        <img src='data:image/png;base64,{img_base64}'>
-    </div>
-    """
-    components.html(chart_html, height=400)
+# 카드 안에 차트 표시
+st.markdown('<div class="card"><h4>License by Department</h4>', unsafe_allow_html=True)
+st.pyplot(fig)
+st.markdown('</div>', unsafe_allow_html=True)
 
-# License Expiry Alerts 카드 (타이틀 + 테이블 같이)
-with st.container():
-    st.markdown("""
-    <div style='
-        background-color:white;
-        padding:20px;
-        margin:10px;
-        border:1px solid #ccc;
-        box-shadow:0px 2px 4px rgba(0,0,0,0.1);
-        border-radius:8px;
-    '>
-        <h4>License Expiry Alerts</h4>
-    """, unsafe_allow_html=True)
+# License Expiry Alerts (타이틀 + 테이블 한 카드 내)
+st.markdown('<div class="card"><h4>License Expiry Alerts</h4>', unsafe_allow_html=True)
 
-    df_alerts = pd.DataFrame({
-        "User": ["user1", "user2", "user3"],
-        "License": ["Professional", "Basic", "Viewer"],
-        "Expires": ["2025-09-01", "2025-08-20", "2025-08-10"]
-    })
-    st.dataframe(df_alerts, use_container_width=True)
+df_alerts = pd.DataFrame({
+    "User": ["user1", "user2", "user3"],
+    "License": ["Professional", "Basic", "Viewer"],
+    "Expires": ["2025-09-01", "2025-08-20", "2025-08-10"]
+})
+st.dataframe(df_alerts, use_container_width=True)
 
-    st.markdown("</div>", unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
