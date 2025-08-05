@@ -17,6 +17,7 @@ st.markdown("""
 /* Streamlit 기본 스타일 숨기기 */
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
+header {visibility: hidden;}
 
 /* 전체 페이지 배경색 적용 */
 .stApp {
@@ -84,6 +85,7 @@ footer {visibility: hidden;}
     align-items: center;
     background-color: var(--widget-bg-color);
     padding: 0 20px;
+    border-bottom: 1px solid #e0e0e0;
     box-shadow: 0 2px 2px -2px rgba(0,0,0,0.1);
     position: fixed;
     top: 50px; /* 타이틀바 높이만큼 하단에 위치 */
@@ -92,24 +94,26 @@ footer {visibility: hidden;}
     z-index: 999;
 }
 
-.menu-item {
-    padding: 10px 15px;
-    margin-right: 10px;
-    cursor: pointer;
-    font-weight: bold;
-    color: #555;
-    text-decoration: none;
+/* 메뉴 버튼 기본 스타일 제거 */
+.stButton>button {
+    background-color: transparent !important;
+    color: #555 !important;
+    border: none !important;
+    font-weight: bold !important;
+    box-shadow: none !important;
+    padding: 10px 15px !important;
+    margin: 0 !important;
     transition: color 0.2s, border-bottom 0.2s;
-    user-select: none; /* 텍스트 선택 방지 */
 }
 
-.menu-item:hover {
-    color: var(--primary-color);
+.stButton>button:hover {
+    color: var(--primary-color) !important;
 }
 
-.menu-item.selected {
-    color: var(--primary-color);
-    border-bottom: 3px solid var(--primary-color);
+/* 선택된 메뉴에 대한 스타일 */
+.selected-menu {
+    color: var(--primary-color) !important;
+    border-bottom: 3px solid var(--primary-color) !important;
 }
 
 /* 4. 본문 및 위젯 스타일 (Figma 디자인 반영) */
@@ -166,40 +170,27 @@ def render_menu():
     
     st.markdown('<div class="menu-container">', unsafe_allow_html=True)
     
-    # st.button 대신 HTML 버튼을 사용하여 커스텀 스타일 적용
     cols = st.columns(len(menu_items))
     for i, item in enumerate(menu_items):
-        is_selected = " selected" if st.session_state.page == item else ""
         with cols[i]:
-            if st.button(item, key=f"menu_{item}", type="secondary"):
-                st.session_state.page = item
-                st.rerun()
+            if st.session_state.page == item:
+                st.button(item, key=f"menu_{item}", type="secondary", help=f"Go to {item}", disabled=True)
+            else:
+                if st.button(item, key=f"menu_{item}", type="secondary", help=f"Go to {item}"):
+                    st.session_state.page = item
+                    st.rerun()
 
-    # st.button의 기본 스타일을 CSS로 덮어쓰기
-    st.markdown("""
-    <style>
-    .stButton>button {
-        background-color: transparent !important;
-        color: #555 !important;
-        border: none !important;
-        font-weight: bold !important;
-        box-shadow: none !important;
-        padding: 10px 15px !important;
-        margin: 0 !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
-    # 선택된 메뉴 아이템에 대한 스타일 적용
+    # 선택된 메뉴 아이템에 대한 CSS 스타일 적용
     st.markdown(f"""
     <style>
     [data-testid="stButton-secondary"] button[kind="secondary"][aria-label="menu_{st.session_state.page}"] {{
         color: var(--primary-color) !important;
         border-bottom: 3px solid var(--primary-color) !important;
+        font-weight: bold !important;
     }}
     </style>
     """, unsafe_allow_html=True)
-
+    
     st.markdown('</div>', unsafe_allow_html=True)
 
 # --- 4. Figma 기반 가상 데이터 생성 ---
