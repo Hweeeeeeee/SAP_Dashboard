@@ -3,6 +3,7 @@ from PIL import Image
 import pandas as pd
 import matplotlib.pyplot as plt
 from streamlit_option_menu import option_menu
+import streamlit.components.v1 as components
 import io
 
 # 기본 페이지 설정
@@ -15,7 +16,6 @@ st.set_page_config(
 # CSS 스타일 추가
 st.markdown("""
     <style>
-        /* 타이틀바 영역 */
         .title-bar {
             display: flex;
             justify-content: space-between;
@@ -41,21 +41,6 @@ st.markdown("""
             gap: 20px;
             align-items: center;
         }
-        .menu-bar {
-            background-color: white;
-            border-bottom: 1px solid #ddd;
-            box-shadow: 0px 2px 3px -2px rgba(0,0,0,0.1);
-            padding: 5px 0;
-        }
-        .widget-box {
-            background-color: white;
-            padding: 20px;
-            margin-bottom: 20px;
-            border: 1px solid #ccc;
-            box-shadow: 0px 2px 4px rgba(0,0,0,0.1);
-            border-radius: 8px;
-            text-align: center;
-        }
         .stApp {
             background-color: #f8f9fa;
         }
@@ -65,7 +50,7 @@ st.markdown("""
 # 타이틀바 영역
 st.markdown('<div class="title-bar">'
     '<div class="title-bar-left">'
-    f'<img src="https://upload.wikimedia.org/wikipedia/commons/5/59/SAP_2011_logo.svg" class="title-logo">'
+    '<img src="https://upload.wikimedia.org/wikipedia/commons/5/59/SAP_2011_logo.svg" class="title-logo">'
     '<span class="title-text">FUE License Management</span>'
     '</div>'
     '<div class="title-bar-right">'
@@ -101,64 +86,93 @@ selected = option_menu(
     }
 )
 
-# 본문 영역
+# 카드 출력 함수
+def render_card(title, value):
+    html = f"""
+    <div style='
+        background-color:white;
+        padding:20px;
+        margin-bottom:20px;
+        border:1px solid #ccc;
+        box-shadow:0px 2px 4px rgba(0,0,0,0.1);
+        border-radius:8px;
+        text-align:center;
+    '>
+        <h4>{title}</h4>
+        <h1>{value}</h1>
+    </div>
+    """
+    components.html(html, height=150)
+
 st.write("\n")
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    with st.container():
-        st.markdown('<div class="widget-box">', unsafe_allow_html=True)
-        st.subheader("Total Licenses")
-        st.markdown("<h1>128</h1>", unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+    render_card("Total Licenses", 128)
 
 with col2:
-    with st.container():
-        st.markdown('<div class="widget-box">', unsafe_allow_html=True)
-        st.subheader("Used Licenses")
-        st.markdown("<h1>94</h1>", unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+    render_card("Used Licenses", 94)
 
 with col3:
-    with st.container():
-        st.markdown('<div class="widget-box">', unsafe_allow_html=True)
-        st.subheader("Available Licenses")
-        st.markdown("<h1>34</h1>", unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+    render_card("Available Licenses", 34)
 
 col4, col5 = st.columns(2)
 
 with col4:
-    with st.container():
-        st.markdown('<div class="widget-box">', unsafe_allow_html=True)
-        st.subheader("User Stats")
-        st.metric(label="Active Users", value="87")
-        st.metric(label="Inactive Users", value="13")
-        st.metric(label="New Users (This Month)", value="7")
-        st.markdown('</div>', unsafe_allow_html=True)
+    components.html("""
+    <div style='
+        background-color:white;
+        padding:20px;
+        border:1px solid #ccc;
+        box-shadow:0px 2px 4px rgba(0,0,0,0.1);
+        border-radius:8px;
+    '>
+        <h4>User Stats</h4>
+        <ul style='list-style:none; padding-left:0; text-align:left;'>
+            <li><b>Active Users:</b> 87</li>
+            <li><b>Inactive Users:</b> 13</li>
+            <li><b>New Users (This Month):</b> 7</li>
+        </ul>
+    </div>
+    """, height=180)
 
 with col5:
     with st.container():
-        st.markdown('<div class="widget-box">', unsafe_allow_html=True)
-        st.subheader("License by Department")
+        st.markdown("""
+        <div style='
+            background-color:white;
+            padding:20px;
+            border:1px solid #ccc;
+            box-shadow:0px 2px 4px rgba(0,0,0,0.1);
+            border-radius:8px;
+        '>
+        <h4>License by Department</h4>
+        """, unsafe_allow_html=True)
         departments = ["Finance", "HR", "IT", "Sales"]
         counts = [30, 20, 45, 33]
         fig, ax = plt.subplots()
         ax.bar(departments, counts)
         ax.set_ylabel("Licenses")
-        ax.set_title("Department-wise Usage")
         buf = io.BytesIO()
         fig.savefig(buf, format="png")
         st.image(buf)
-        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
 with st.container():
-    st.markdown('<div class="widget-box">', unsafe_allow_html=True)
-    st.subheader("License Expiry Alerts")
+    st.markdown("""
+    <div style='
+        background-color:white;
+        padding:20px;
+        border:1px solid #ccc;
+        box-shadow:0px 2px 4px rgba(0,0,0,0.1);
+        border-radius:8px;
+    '>
+    <h4>License Expiry Alerts</h4>
+    """, unsafe_allow_html=True)
     df_alerts = pd.DataFrame({
         "User": ["user1", "user2", "user3"],
         "License": ["Professional", "Basic", "Viewer"],
         "Expires": ["2025-09-01", "2025-08-20", "2025-08-10"]
     })
     st.dataframe(df_alerts, use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
