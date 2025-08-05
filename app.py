@@ -140,39 +140,37 @@ if 'page' not in st.session_state:
 
 def render_header():
     """타이틀바 영역 렌더링"""
-    col1, col2 = st.columns([1, 10])
-    with col1:
-        st.markdown(
-            f'<div class="header-left">'
-            f'<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/SAP_2011_logo.svg/1024px-SAP_2011_logo.svg.png" class="sap-logo">'
-            f'</div>',
-            unsafe_allow_html=True
-        )
-    with col2:
-        col3, col4, col5, col6, col7 = st.columns([10, 1, 1, 1, 1])
-        with col3:
-            st.markdown(f'<span style="font-size: 20px; font-weight: bold;">FUE License Management</span>', unsafe_allow_html=True)
-        with col4:
-            st.markdown(f'<div class="header-right"><div style="display:none;"></div>', unsafe_allow_html=True) # 공간 확보
-        with col5:
-            st.markdown(f'<div class="header-right"><span class="search-icon">🔍</span></div>', unsafe_allow_html=True)
-        with col6:
-            st.markdown(f'<div class="header-right"><span class="alarm-icon">🔔</span></div>', unsafe_allow_html=True)
-        with col7:
-            st.markdown(f'<div class="header-right"><div class="profile-circle">JP</div></div>', unsafe_allow_html=True)
+    # 타이틀바는 고정되어야 하므로 st.columns로 구현하지 않고 HTML/CSS로 전체 영역을 정의
+    st.markdown(
+        f'<div class="header-container">'
+        f'<div class="header-left">'
+        f'<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/SAP_2011_logo.svg/1024px-SAP_2011_logo.svg.png" class="sap-logo">'
+        f'<span style="font-size: 20px; font-weight: bold;">FUE License Management</span>'
+        f'</div>'
+        f'<div class="header-right">'
+        f'<span class="search-icon">🔍</span>'
+        f'<span class="alarm-icon">🔔</span>'
+        f'<div class="profile-circle">JP</div>'
+        f'</div>'
+        f'</div>',
+        unsafe_allow_html=True
+    )
 
 def render_menu():
     """메뉴 영역 렌더링"""
     menu_items = ['Home', 'FUE License', 'User', 'My account']
     
+    # HTML/CSS를 사용하여 메뉴 렌더링
     st.markdown('<div class="menu-container">', unsafe_allow_html=True)
     
-    for item in menu_items:
+    cols = st.columns(len(menu_items))
+    for i, item in enumerate(menu_items):
         is_selected = " selected" if st.session_state.page == item else ""
-        if st.markdown(f'<div class="menu-item{is_selected}" onclick="parent.postMessage({{streamlit: {{command: \'setPage\', args: [\'_page_{item}\']}}}}, \'*\')">{item}</div>', unsafe_allow_html=True):
-            st.session_state.page = item
-            st.experimental_rerun()
-            
+        with cols[i]:
+            if st.button(item, key=f"menu_{item}"):
+                st.session_state.page = item
+                st.rerun()
+
     st.markdown('</div>', unsafe_allow_html=True)
 
 # --- 4. 가상 데이터 생성 ---
@@ -192,7 +190,7 @@ def generate_sample_data():
         "User_ID": [f"user{i+1}" for i in range(10)],
         "User_Name": [f"User Name {i+1}" for i in range(10)],
         "License_Type": np.random.choice(data["license_type"], 10),
-        "Last_Login_Date": pd.to_datetime(pd.Series(np.random.randint(pd.Timestamp('2023-01-01').value, pd.Timestamp('2024-07-31').value, 10)), unit='ns').date
+        "Last_Login_Date": pd.to_datetime(pd.Series(np.random.randint(pd.Timestamp('2023-01-01').value, pd.Timestamp('2024-07-31').value, 10)), unit='ns').dt.date
     })
 
     return df_licenses, df_users
@@ -208,30 +206,28 @@ def show_home():
     # 3개의 KPI 위젯 (Figma 참고)
     col1, col2, col3 = st.columns(3)
     with col1:
-        with st.container():
-            st.markdown('<div class="widget-container">', unsafe_allow_html=True)
-            st.markdown('<div class="widget-title">Total Active Users</div>', unsafe_allow_html=True)
-            st.metric(label="", value=f"{len(df_users)}", delta=f"{len(df_users) - 8} from last month")
-            st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('<div class="widget-container">', unsafe_allow_html=True)
+        st.markdown('<div class="widget-title">Total Active Users</div>', unsafe_allow_html=True)
+        st.metric(label="", value=f"{len(df_users)}", delta=f"{len(df_users) - 8} from last month")
+        st.markdown('</div>', unsafe_allow_html=True)
     with col2:
-        with st.container():
-            st.markdown('<div class="widget-container">', unsafe_allow_html=True)
-            st.markdown('<div class="widget-title">Total License Cost</div>', unsafe_allow_html=True)
-            total_cost = df_licenses['total_cost'].sum()
-            st.metric(label="", value=f"${total_cost:,.0f}", delta=f"${-5000:,.0f} compared to last year")
-            st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('<div class="widget-container">', unsafe_allow_html=True)
+        st.markdown('<div class="widget-title">Total License Cost</div>', unsafe_allow_html=True)
+        total_cost = df_licenses['total_cost'].sum()
+        st.metric(label="", value=f"${total_cost:,.0f}", delta=f"${-5000:,.0f} compared to last year")
+        st.markdown('</div>', unsafe_allow_html=True)
     with col3:
-        with st.container():
-            st.markdown('<div class="widget-container">', unsafe_allow_html=True)
-            st.markdown('<div class="widget-title">Potential Savings</div>', unsafe_allow_html=True)
-            st.metric(label="", value=f"$35,000", delta=f"30% of license cost")
-            st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('<div class="widget-container">', unsafe_allow_html=True)
+        st.markdown('<div class="widget-title">Potential Savings</div>', unsafe_allow_html=True)
+        st.metric(label="", value=f"$35,000", delta=f"30% of license cost")
+        st.markdown('</div>', unsafe_allow_html=True)
 
     # 차트 위젯
     st.markdown('<div class="widget-container">', unsafe_allow_html=True)
     st.markdown('<div class="widget-title">License Usage by Type</div>', unsafe_allow_html=True)
     st.bar_chart(df_licenses.set_index('license_type')[['assigned', 'available']])
     st.markdown('</div>', unsafe_allow_html=True)
+
     st.markdown('</div>', unsafe_allow_html=True)
 
 def show_fue_license():
