@@ -152,23 +152,37 @@ def load_data():
 
 df = load_data()
 
-# --- KPI 카드 영역 (가로 정렬된 flex container) ---
 st.markdown('<div class="widget">', unsafe_allow_html=True)
-st.markdown('<div class="kpi-cards">', unsafe_allow_html=True)
 
-def kpi_card(title, value):
-    return f'''
-    <div class="kpi-card">
-        <h3>{title}</h3>
-        <p>{value}</p>
-    </div>
-    '''
+# 4개 카드 한꺼번에 담긴 flex 컨테이너
+kpi_cards_html = '''
+<div class="kpi-cards" style="display:flex; flex-direction:row; gap:1.5rem;">
+  <div class="kpi-card" style="flex:1;">
+    <h3>Total Licenses</h3>
+    <p>{total}</p>
+  </div>
+  <div class="kpi-card" style="flex:1;">
+    <h3>Active</h3>
+    <p>{active}</p>
+  </div>
+  <div class="kpi-card" style="flex:1;">
+    <h3>Expired</h3>
+    <p>{expired}</p>
+  </div>
+  <div class="kpi-card" style="flex:1;">
+    <h3>Pending</h3>
+    <p>{pending}</p>
+  </div>
+</div>
+'''.format(
+    total=len(df),
+    active=df[df['Status']=='Active'].shape[0],
+    expired=df[df['Status']=='Expired'].shape[0],
+    pending=df[df['Status']=='Pending'].shape[0]
+)
 
-kpi_html = ""
-kpi_html += kpi_card("Total Licenses", len(df))
-kpi_html += kpi_card("Active", df[df['Status']=='Active'].shape[0])
-kpi_html += kpi_card("Expired", df[df['Status']=='Expired'].shape[0])
-kpi_html += kpi_card("Pending", df[df['Status']=='Pending'].shape[0])
+st.markdown(kpi_cards_html, unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown(kpi_html, unsafe_allow_html=True)
 st.markdown("</div>", unsafe_allow_html=True)  # kpi-cards 닫기
@@ -213,3 +227,4 @@ st.markdown('<div class="widget">', unsafe_allow_html=True)
 st.markdown('<div class="section-title">License Table</div>', unsafe_allow_html=True)
 st.dataframe(df, use_container_width=True)
 st.markdown("</div>", unsafe_allow_html=True)
+
