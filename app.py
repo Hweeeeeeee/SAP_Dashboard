@@ -3,6 +3,7 @@ from PIL import Image
 import pandas as pd
 import matplotlib.pyplot as plt
 from streamlit_option_menu import option_menu
+import io
 
 # 기본 페이지 설정
 st.set_page_config(
@@ -88,7 +89,7 @@ selected = option_menu(
             "font-size": "16px",
             "margin": "0 15px",
             "padding": "8px 12px",
-            "color": "white",
+            "color": "#000000",
         },
         "nav-link-selected": {
             "color": "#0d6efd",
@@ -104,40 +105,48 @@ st.write("\n")
 col1, col2 = st.columns(2)
 
 with col1:
-    st.markdown('<div class="widget-box">', unsafe_allow_html=True)
-    st.subheader("License Summary")
-    st.metric(label="Total Licenses", value="128")
-    st.metric(label="Used Licenses", value="94")
-    st.metric(label="Available Licenses", value="34")
-    st.markdown('</div>', unsafe_allow_html=True)
+    with st.container():
+        st.markdown('<div class="widget-box">', unsafe_allow_html=True)
+        st.subheader("License Summary")
+        st.metric(label="Total Licenses", value="128")
+        st.metric(label="Used Licenses", value="94")
+        st.metric(label="Available Licenses", value="34")
+        st.markdown('</div>', unsafe_allow_html=True)
 
 with col2:
-    st.markdown('<div class="widget-box">', unsafe_allow_html=True)
-    st.subheader("User Stats")
-    st.metric(label="Active Users", value="87")
-    st.metric(label="Inactive Users", value="13")
-    st.metric(label="New Users (This Month)", value="7")
-    st.markdown('</div>', unsafe_allow_html=True)
+    with st.container():
+        st.markdown('<div class="widget-box">', unsafe_allow_html=True)
+        st.subheader("User Stats")
+        st.metric(label="Active Users", value="87")
+        st.metric(label="Inactive Users", value="13")
+        st.metric(label="New Users (This Month)", value="7")
+        st.markdown('</div>', unsafe_allow_html=True)
 
 col3, col4 = st.columns(2)
 
 with col3:
-    st.markdown('<div class="widget-box">', unsafe_allow_html=True)
-    st.subheader("License by Department")
-    departments = ["Finance", "HR", "IT", "Sales"]
-    counts = [30, 20, 45, 33]
-    fig, ax = plt.subplots()
-    ax.bar(departments, counts)
-    st.pyplot(fig)
-    st.markdown('</div>', unsafe_allow_html=True)
+    with st.container():
+        st.markdown('<div class="widget-box">', unsafe_allow_html=True)
+        st.subheader("License by Department")
+        departments = ["Finance", "HR", "IT", "Sales"]
+        counts = [30, 20, 45, 33]
+        fig, ax = plt.subplots()
+        ax.bar(departments, counts)
+        ax.set_ylabel("Licenses")
+        ax.set_title("Department-wise Usage")
+        buf = io.BytesIO()
+        fig.savefig(buf, format="png")
+        st.image(buf)
+        st.markdown('</div>', unsafe_allow_html=True)
 
 with col4:
-    st.markdown('<div class="widget-box">', unsafe_allow_html=True)
-    st.subheader("License Expiry Alerts")
-    df_alerts = pd.DataFrame({
-        "User": ["user1", "user2", "user3"],
-        "License": ["Professional", "Basic", "Viewer"],
-        "Expires": ["2025-09-01", "2025-08-20", "2025-08-10"]
-    })
-    st.table(df_alerts)
-    st.markdown('</div>', unsafe_allow_html=True)
+    with st.container():
+        st.markdown('<div class="widget-box">', unsafe_allow_html=True)
+        st.subheader("License Expiry Alerts")
+        df_alerts = pd.DataFrame({
+            "User": ["user1", "user2", "user3"],
+            "License": ["Professional", "Basic", "Viewer"],
+            "Expires": ["2025-09-01", "2025-08-20", "2025-08-10"]
+        })
+        st.dataframe(df_alerts, use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
