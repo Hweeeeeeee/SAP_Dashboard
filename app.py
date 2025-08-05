@@ -1,247 +1,277 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
+import numpy as np
 
-st.set_page_config(page_title="FUE License Management", layout="wide")
+# --- 1. 페이지 설정 및 커스텀 CSS ---
+# 전체 페이지 레이아웃을 넓게 설정
+st.set_page_config(layout="wide")
 
-# --- CSS 스타일 ---
+# SAP UI 스타일을 위한 커스텀 CSS
 st.markdown("""
 <style>
-/* 전체 배경 밝은 회색 */
-.main > div.block-container {
-    padding: 1.5rem 2rem;
-    background-color: #f3f2f1;
-    min-height: 100vh;
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    color: #323130;
+/* Streamlit 기본 스타일 숨기기 (헤더, 푸터 등) */
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+
+/* 전체 페이지 배경색 */
+body {
+    background-color: #f0f2f6; /* 아주 연한 회색 */
 }
 
-/* 상단 타이틀바 */
-.topbar {
+/* 1-1, 1-2. 최상단 타이틀바 영역 스타일 */
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
     background-color: white;
-    padding: 1rem 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    height: 50px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+.header-left {
     display: flex;
     align-items: center;
-    font-weight: 700;
-    font-size: 24px;
-    color: #0078d4; /* MS 블루 */
-    box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
+    gap: 15px;
 }
 
-/* SAP 로고 느낌 텍스트 */
-.topbar .sap-logo {
-    font-weight: 900;
-    margin-right: 12px;
-    color: #0078d4;
-    font-size: 28px;
-}
-
-/* 메뉴바 */
-.menubar {
-    background-color: white;
-    padding-left: 2rem;
-    padding-top: 0.5rem;
+.header-right {
     display: flex;
-    gap: 2rem;
-    font-weight: 600;
-    font-size: 16px;
-    border-bottom: 1px solid #e1dfdd;
+    align-items: center;
+    gap: 20px;
 }
 
-/* 메뉴 아이템 기본 */
-.menubar .menu-item {
-    padding-bottom: 0.5rem;
-    color: #605e5c;
+.sap-logo {
+    height: 30px;
+}
+
+.search-icon {
+    font-size: 20px;
     cursor: pointer;
-    position: relative;
 }
 
-/* 현재 활성화된 메뉴 스타일 */
-.menubar .menu-item.active {
-    color: #0078d4;
-    font-weight: 700;
+.alarm-icon {
+    font-size: 20px;
+    cursor: pointer;
 }
 
-/* 활성화 메뉴 밑 파란 언더라인 */
-.menubar .menu-item.active::after {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 3px;
-    background-color: #0078d4;
-    border-radius: 3px 3px 0 0;
-}
-
-/* 위젯 박스 스타일 */
-.widget {
-    background-color: white;
-    padding: 1.5rem;
-    border: 1px solid #e1dfdd;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgb(0 0 0 / 0.05);
-    margin-bottom: 1.8rem;
-}
-
-/* KPI 카드 컨테이너 - 가로 정렬 */
-.kpi-cards {
+.profile-circle {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #007bff;
+    color: white;
     display: flex;
-    flex-direction: row;
-    gap: 1.5rem;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    cursor: pointer;
 }
 
-/* KPI 카드 */
-.kpi-card {
-    flex: 1;
+/* 2, 3. 메뉴 영역 스타일 */
+.menu-container {
     background-color: white;
-    border: 1px solid #e1dfdd;
+    display: flex;
+    justify-content: flex-start;
+    padding: 0 20px;
+    border-bottom: 1px solid #e0e0e0;
+    box-shadow: 0 2px 4px -2px rgba(0,0,0,0.1);
+    margin-top: 50px; /* 타이틀바 높이만큼 마진 */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 999;
+}
+
+.menu-item {
+    padding: 10px 15px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #555;
+    text-decoration: none;
+    transition: color 0.2s, border-bottom 0.2s;
+}
+
+.menu-item:hover {
+    color: #007bff;
+}
+
+.menu-item.selected {
+    color: #007bff;
+    border-bottom: 3px solid #007bff;
+}
+
+/* 4. 본문 및 위젯 스타일 */
+.main-content {
+    background-color: #f0f2f6; /* 아주 연한 회색 */
+    padding: 20px;
+    margin-top: 100px; /* 타이틀바+메뉴바 높이만큼 마진 */
+}
+
+.widget-container {
+    background-color: white;
+    padding: 20px;
     border-radius: 8px;
-    padding: 1rem 1.5rem;
-    text-align: center;
-    box-shadow: 0 2px 6px rgb(0 0 0 / 0.04);
-    transition: box-shadow 0.3s ease;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
 }
 
-.kpi-card:hover {
-    box-shadow: 0 6px 15px rgb(0 0 0 / 0.15);
-}
-
-.kpi-card h3 {
-    margin-bottom: 0.4rem;
-    font-weight: 600;
-    color: #323130;
+.widget-title {
     font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #333;
 }
-
-.kpi-card p {
-    margin: 0;
-    font-size: 28px;
-    font-weight: 700;
-    color: #0078d4;
-}
-
-/* 섹션 제목 */
-.section-title {
-    font-weight: 700;
-    font-size: 22px;
-    margin-bottom: 1rem;
-    color: #323130;
-}
-
-/* Plotly 차트 배경 및 폰트 색상 */
-.js-plotly-plot .main-svg {
-    background-color: white !important;
-}
-
-/* 테이블 스타일은 Streamlit 기본 유지 */
 </style>
 """, unsafe_allow_html=True)
 
-# --- 상단 타이틀바 ---
-st.markdown("""
-<div class="topbar">
-    <div class="sap-logo">SAP</div>
-    FUE License Management
-</div>
-""", unsafe_allow_html=True)
+# --- 2. 상태 관리 (메뉴 선택) ---
+if 'page' not in st.session_state:
+    st.session_state.page = 'Home'
 
-# --- 메뉴바 ---
-menu_items = ["Home", "FUE License", "User", "My Account"]
-selected_menu = st.session_state.get("selected_menu", "Home")
+# --- 3. UI 요소 함수 ---
 
-def set_menu(item):
-    st.session_state.selected_menu = item
+def render_header():
+    """타이틀바 영역 렌더링"""
+    col1, col2 = st.columns([1, 10])
+    with col1:
+        st.markdown(
+            f'<div class="header-left">'
+            f'<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/SAP_2011_logo.svg/1024px-SAP_2011_logo.svg.png" class="sap-logo">'
+            f'</div>',
+            unsafe_allow_html=True
+        )
+    with col2:
+        col3, col4, col5, col6, col7 = st.columns([10, 1, 1, 1, 1])
+        with col3:
+            st.markdown(f'<span style="font-size: 20px; font-weight: bold;">FUE License Management</span>', unsafe_allow_html=True)
+        with col4:
+            st.markdown(f'<div class="header-right"><div style="display:none;"></div>', unsafe_allow_html=True) # 공간 확보
+        with col5:
+            st.markdown(f'<div class="header-right"><span class="search-icon">🔍</span></div>', unsafe_allow_html=True)
+        with col6:
+            st.markdown(f'<div class="header-right"><span class="alarm-icon">🔔</span></div>', unsafe_allow_html=True)
+        with col7:
+            st.markdown(f'<div class="header-right"><div class="profile-circle">JP</div></div>', unsafe_allow_html=True)
 
-cols = st.columns(len(menu_items))
-for i, item in enumerate(menu_items):
-    is_active = (item == selected_menu)
-    label_html = f'<div class="menu-item{" active" if is_active else ""}">{item}</div>'
-    if cols[i].button(item, key=f"menu_{i}"):
-        set_menu(item)
-        st.experimental_rerun()
-    cols[i].markdown(label_html, unsafe_allow_html=True)
-
-# --- 데이터 로드 ---
-@st.cache_data
-def load_data():
-    # Figma 참고 데이터 (예시)
-    data = {
-        "LicenseID": [1,2,3,4,5,6,7,8,9,10],
-        "User": ["Alice","Bob","Carol","David","Eve","Frank","Grace","Hank","Ivy","Jack"],
-        "Status": ["Active","Expired","Active","Pending","Active","Expired","Pending","Active","Active","Expired"],
-        "StartDate": ["2023-01-10","2022-05-15","2023-03-12","2023-06-01","2023-02-20","2021-12-30","2023-07-10","2023-04-01","2023-05-05","2022-11-11"],
-        "EndDate": ["2024-01-09","2023-05-14","2024-03-11","2023-07-01","2024-02-19","2022-12-29","2023-08-10","2024-04-01","2024-05-04","2023-11-10"],
-    }
-    return pd.DataFrame(data)
-
-df = load_data()
-
-# --- 본문 ---
-if selected_menu == "Home":
-    # KPI 카드 4개 가로 배치
-    st.markdown('<div class="widget">', unsafe_allow_html=True)
-
-    kpi_html = f'''
-    <div class="kpi-cards">
-        <div class="kpi-card">
-            <h3>Total Licenses</h3>
-            <p>{len(df)}</p>
-        </div>
-        <div class="kpi-card">
-            <h3>Active</h3>
-            <p>{df[df['Status']=="Active"].shape[0]}</p>
-        </div>
-        <div class="kpi-card">
-            <h3>Expired</h3>
-            <p>{df[df['Status']=="Expired"].shape[0]}</p>
-        </div>
-        <div class="kpi-card">
-            <h3>Pending</h3>
-            <p>{df[df['Status']=="Pending"].shape[0]}</p>
-        </div>
-    </div>
-    '''
-    st.markdown(kpi_html, unsafe_allow_html=True)
+def render_menu():
+    """메뉴 영역 렌더링"""
+    menu_items = ['Home', 'FUE License', 'User', 'My account']
+    
+    st.markdown('<div class="menu-container">', unsafe_allow_html=True)
+    
+    for item in menu_items:
+        is_selected = " selected" if st.session_state.page == item else ""
+        if st.markdown(f'<div class="menu-item{is_selected}" onclick="parent.postMessage({{streamlit: {{command: \'setPage\', args: [\'_page_{item}\']}}}}, \'*\')">{item}</div>', unsafe_allow_html=True):
+            st.session_state.page = item
+            st.experimental_rerun()
+            
     st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown('<div class="widget">', unsafe_allow_html=True)
-    st.markdown('<div class="section-title">Overview - License Status</div>', unsafe_allow_html=True)
+# --- 4. 가상 데이터 생성 ---
+@st.cache_data
+def generate_sample_data():
+    """대시보드 위젯에 사용할 가상 데이터를 생성"""
+    data = {
+        "license_type": ["Professional", "Limited Professional", "Employee", "Developer"],
+        "assigned": np.random.randint(10, 150, 4),
+        "available": np.random.randint(20, 200, 4),
+        "cost_per_year": [4000, 2500, 1500, 5000]
+    }
+    df_licenses = pd.DataFrame(data)
+    df_licenses['total_cost'] = df_licenses['assigned'] * df_licenses['cost_per_year']
 
-    status_counts = df["Status"].value_counts().reset_index()
-    status_counts.columns = ["Status", "Count"]
+    df_users = pd.DataFrame({
+        "User_ID": [f"user{i+1}" for i in range(10)],
+        "User_Name": [f"User Name {i+1}" for i in range(10)],
+        "License_Type": np.random.choice(data["license_type"], 10),
+        "Last_Login_Date": pd.to_datetime(pd.Series(np.random.randint(pd.Timestamp('2023-01-01').value, pd.Timestamp('2024-07-31').value, 10)), unit='ns').date
+    })
 
-    fig_pie = px.pie(status_counts, names="Status", values="Count", hole=0.35,
-                     color_discrete_map={
-                         "Active": "#0078d4",
-                         "Expired": "#d13438",
-                         "Pending": "#ffb900"
-                     })
+    return df_licenses, df_users
 
-    fig_bar = px.bar(status_counts, x="Status", y="Count", color="Status",
-                     color_discrete_map={
-                         "Active": "#0078d4",
-                         "Expired": "#d13438",
-                         "Pending": "#ffb900"
-                     },
-                     text="Count")
-    fig_bar.update_traces(textposition='outside')
-    fig_bar.update_layout(yaxis_title="Count", xaxis_title="Status", showlegend=False,
-                          plot_bgcolor='white', paper_bgcolor='white',
-                          font_color='#323130')
+df_licenses, df_users = generate_sample_data()
 
-    c1, c2 = st.columns(2)
-    with c1:
-        st.plotly_chart(fig_pie, use_container_width=True)
-    with c2:
-        st.plotly_chart(fig_bar, use_container_width=True)
+# --- 5. 콘텐츠 페이지 함수 ---
+def show_home():
+    """Home 페이지 콘텐츠"""
+    st.markdown('<div class="main-content">', unsafe_allow_html=True)
+    st.markdown('<div class="widget-title">Dashboard Overview</div>', unsafe_allow_html=True)
+    
+    # 3개의 KPI 위젯 (Figma 참고)
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        with st.container():
+            st.markdown('<div class="widget-container">', unsafe_allow_html=True)
+            st.markdown('<div class="widget-title">Total Active Users</div>', unsafe_allow_html=True)
+            st.metric(label="", value=f"{len(df_users)}", delta=f"{len(df_users) - 8} from last month")
+            st.markdown('</div>', unsafe_allow_html=True)
+    with col2:
+        with st.container():
+            st.markdown('<div class="widget-container">', unsafe_allow_html=True)
+            st.markdown('<div class="widget-title">Total License Cost</div>', unsafe_allow_html=True)
+            total_cost = df_licenses['total_cost'].sum()
+            st.metric(label="", value=f"${total_cost:,.0f}", delta=f"${-5000:,.0f} compared to last year")
+            st.markdown('</div>', unsafe_allow_html=True)
+    with col3:
+        with st.container():
+            st.markdown('<div class="widget-container">', unsafe_allow_html=True)
+            st.markdown('<div class="widget-title">Potential Savings</div>', unsafe_allow_html=True)
+            st.metric(label="", value=f"$35,000", delta=f"30% of license cost")
+            st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown("</div>", unsafe_allow_html=True)
+    # 차트 위젯
+    st.markdown('<div class="widget-container">', unsafe_allow_html=True)
+    st.markdown('<div class="widget-title">License Usage by Type</div>', unsafe_allow_html=True)
+    st.bar_chart(df_licenses.set_index('license_type')[['assigned', 'available']])
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown('<div class="widget">', unsafe_allow_html=True)
-    st.markdown('<div class="section-title">License Table</div>', unsafe_allow_html=True)
-    st.dataframe(df, use_container_width=True)
-    st.markdown("</div>", unsafe_allow_html=True)
+def show_fue_license():
+    """FUE License 페이지 콘텐츠"""
+    st.markdown('<div class="main-content">', unsafe_allow_html=True)
+    st.markdown('<div class="widget-container">', unsafe_allow_html=True)
+    st.markdown('<div class="widget-title">License Details</div>', unsafe_allow_html=True)
+    st.dataframe(df_licenses.set_index('license_type'), use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
-else:
-    st.markdown(f'<div class="widget"><h2>{selected_menu} 페이지 준비중입니다.</h2></div>', unsafe_allow_html=True)
+def show_user():
+    """User 페이지 콘텐츠"""
+    st.markdown('<div class="main-content">', unsafe_allow_html=True)
+    st.markdown('<div class="widget-container">', unsafe_allow_html=True)
+    st.markdown('<div class="widget-title">User Management</div>', unsafe_allow_html=True)
+    st.dataframe(df_users, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+def show_my_account():
+    """My account 페이지 콘텐츠"""
+    st.markdown('<div class="main-content">', unsafe_allow_html=True)
+    st.markdown('<div class="widget-container">', unsafe_allow_html=True)
+    st.markdown('<div class="widget-title">Account Information</div>', unsafe_allow_html=True)
+    st.write("사용자 정보와 설정을 관리하는 페이지입니다.")
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# --- 6. 메인 앱 실행 로직 ---
+# 헤더와 메뉴 영역은 항상 표시
+render_header()
+render_menu()
+
+# 선택된 페이지에 따라 콘텐츠 렌더링
+if st.session_state.page == 'Home':
+    show_home()
+elif st.session_state.page == 'FUE License':
+    show_fue_license()
+elif st.session_state.page == 'User':
+    show_user()
+elif st.session_state.page == 'My account':
+    show_my_account()
