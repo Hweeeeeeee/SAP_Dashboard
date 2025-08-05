@@ -24,11 +24,31 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-col1, col2, col3, col4 = st.columns(4)
-col1.metric("Total Licenses", len(df))
-col2.metric("Active", df[df['Status'] == 'Active'].shape[0])
-col3.metric("Expired", df[df['Status'] == 'Expired'].shape[0])
-col4.metric("Pending", df[df['Status'] == 'Pending'].shape[0])
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.markdown("""
+    <div style="background-color: #f2f2f2; padding: 20px; border-radius: 10px; text-align: center;">
+        <h3 style="color: #333333;">Total Licenses</h3>
+        <p style="font-size: 24px; font-weight: bold;">120</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col2:
+    st.markdown("""
+    <div style="background-color: #eaf8ea; padding: 20px; border-radius: 10px; text-align: center;">
+        <h3 style="color: #2e7d32;">Active</h3>
+        <p style="font-size: 24px; font-weight: bold;">93</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col3:
+    st.markdown("""
+    <div style="background-color: #fff3e0; padding: 20px; border-radius: 10px; text-align: center;">
+        <h3 style="color: #ef6c00;">Expired</h3>
+        <p style="font-size: 24px; font-weight: bold;">27</p>
+    </div>
+    """, unsafe_allow_html=True)
 
 st.markdown("---")
 
@@ -58,4 +78,5 @@ st.plotly_chart(fig, use_container_width=True)
 # --- 테이블 ---
 st.markdown("### 📋 License Table")
 st.dataframe(filtered_df, use_container_width=True)
+
 
