@@ -51,9 +51,9 @@ st.markdown("""
             background-color: white;
             padding: 20px;
             margin-bottom: 20px;
-            border: 1px solid #eee;
-            box-shadow: 0px 2px 4px rgba(0,0,0,0.05);
-            border-radius: 6px;
+            border: 1px solid #ccc;
+            box-shadow: 0px 2px 4px rgba(0,0,0,0.1);
+            border-radius: 8px;
             text-align: center;
         }
         .stApp {
@@ -106,22 +106,25 @@ st.write("\n")
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    st.markdown('<div class="widget-box">', unsafe_allow_html=True)
-    st.subheader("Total Licenses")
-    st.markdown("<h1>128</h1>", unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+    with st.container():
+        st.markdown('<div class="widget-box">', unsafe_allow_html=True)
+        st.subheader("Total Licenses")
+        st.markdown("<h1>128</h1>", unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
 with col2:
-    st.markdown('<div class="widget-box">', unsafe_allow_html=True)
-    st.subheader("Used Licenses")
-    st.markdown("<h1>94</h1>", unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+    with st.container():
+        st.markdown('<div class="widget-box">', unsafe_allow_html=True)
+        st.subheader("Used Licenses")
+        st.markdown("<h1>94</h1>", unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
 with col3:
-    st.markdown('<div class="widget-box">', unsafe_allow_html=True)
-    st.subheader("Available Licenses")
-    st.markdown("<h1>34</h1>", unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+    with st.container():
+        st.markdown('<div class="widget-box">', unsafe_allow_html=True)
+        st.subheader("Available Licenses")
+        st.markdown("<h1>34</h1>", unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
 col4, col5 = st.columns(2)
 
@@ -149,12 +152,13 @@ with col5:
         st.image(buf)
         st.markdown('</div>', unsafe_allow_html=True)
 
-st.markdown('<div class="widget-box">', unsafe_allow_html=True)
-st.subheader("License Expiry Alerts")
-df_alerts = pd.DataFrame({
-    "User": ["user1", "user2", "user3"],
-    "License": ["Professional", "Basic", "Viewer"],
-    "Expires": ["2025-09-01", "2025-08-20", "2025-08-10"]
-})
-st.dataframe(df_alerts, use_container_width=True)
-st.markdown('</div>', unsafe_allow_html=True)
+with st.container():
+    st.markdown('<div class="widget-box">', unsafe_allow_html=True)
+    st.subheader("License Expiry Alerts")
+    df_alerts = pd.DataFrame({
+        "User": ["user1", "user2", "user3"],
+        "License": ["Professional", "Basic", "Viewer"],
+        "Expires": ["2025-09-01", "2025-08-20", "2025-08-10"]
+    })
+    st.dataframe(df_alerts, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
