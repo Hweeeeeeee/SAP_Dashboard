@@ -14,7 +14,15 @@ def load_data():
 df = load_data()
 
 # --- 상단 타이틀 및 요약 카드 ---
-st.markdown("## 🎫 License Management Dashboard")
+st.markdown("""
+    <style>
+    .stMetric {
+        background-color: #f2f2f2;
+        border-radius: 10px;
+        padding: 10px;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
 col1, col2, col3, col4 = st.columns(4)
 col1.metric("Total Licenses", len(df))
@@ -50,3 +58,4 @@ st.plotly_chart(fig, use_container_width=True)
 # --- 테이블 ---
 st.markdown("### 📋 License Table")
 st.dataframe(filtered_df, use_container_width=True)
+
