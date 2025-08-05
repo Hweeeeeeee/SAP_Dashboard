@@ -2,59 +2,75 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# --- Page Config ---
-st.set_page_config(layout="wide", page_title="License Dashboard")
+# 페이지 설정
+st.set_page_config(layout="wide", page_title="License Management Dashboard")
 
-# --- Sample CSV 읽기 (예시) ---
-@st.cache_data
-def load_data():
-    # 여기에 실제 CSV 경로를 넣으세요.
-    return pd.read_csv("licenses.csv")
-
-df = load_data()
-
-# --- 상단 타이틀 및 요약 카드 ---
+# --- 스타일 정의 (Figma 스타일 근사화) ---
 st.markdown("""
     <style>
-    .stMetric {
-        background-color: #f2f2f2;
-        border-radius: 10px;
-        padding: 10px;
+    .card {
+        background-color: #f9f9f9;
+        padding: 20px;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .card h3 {
+        color: #333;
+        font-size: 18px;
+        margin-bottom: 8px;
+    }
+    .card p {
+        font-size: 28px;
+        font-weight: bold;
+        margin: 0;
+        color: #2c3e50;
     }
     </style>
 """, unsafe_allow_html=True)
 
-col1, col2, col3 = st.columns(3)
+# --- 데이터 로드 ---
+@st.cache_data
+def load_data():
+    return pd.read_csv("licenses.csv")
 
+df = load_data()
+
+# --- 타이틀 & 카드 요약 ---
+st.title("🎫 License Management Dashboard")
+col1, col2, col3, col4 = st.columns(4)
 with col1:
-    st.markdown("""
-    <div style="background-color: #f2f2f2; padding: 20px; border-radius: 10px; text-align: center;">
-        <h3 style="color: #333333;">Total Licenses</h3>
-        <p style="font-size: 24px; font-weight: bold;">120</p>
-    </div>
+    st.markdown(f"""
+        <div class="card">
+            <h3>Total Licenses</h3>
+            <p>{len(df)}</p>
+        </div>
     """, unsafe_allow_html=True)
-
 with col2:
-    st.markdown("""
-    <div style="background-color: #eaf8ea; padding: 20px; border-radius: 10px; text-align: center;">
-        <h3 style="color: #2e7d32;">Active</h3>
-        <p style="font-size: 24px; font-weight: bold;">93</p>
-    </div>
+    st.markdown(f"""
+        <div class="card">
+            <h3>Active</h3>
+            <p>{df[df["Status"] == "Active"].shape[0]}</p>
+        </div>
     """, unsafe_allow_html=True)
-
 with col3:
-    st.markdown("""
-    <div style="background-color: #fff3e0; padding: 20px; border-radius: 10px; text-align: center;">
-        <h3 style="color: #ef6c00;">Expired</h3>
-        <p style="font-size: 24px; font-weight: bold;">27</p>
-    </div>
+    st.markdown(f"""
+        <div class="card">
+            <h3>Expired</h3>
+            <p>{df[df["Status"] == "Expired"].shape[0]}</p>
+        </div>
+    """, unsafe_allow_html=True)
+with col4:
+    st.markdown(f"""
+        <div class="card">
+            <h3>Pending</h3>
+            <p>{df[df["Status"] == "Pending"].shape[0]}</p>
+        </div>
     """, unsafe_allow_html=True)
 
-st.markdown("---")
-
-# --- 사이드 필터 ---
+# --- 사이드바 필터 ---
 with st.sidebar:
-    st.header("🔎 Filters")
+    st.header("🔍 Filter Licenses")
     name_filter = st.text_input("User Name")
     status_filter = st.selectbox("License Status", options=["All"] + df["Status"].unique().tolist())
     product_filter = st.multiselect("Product", options=df["Product"].unique())
@@ -69,14 +85,12 @@ if product_filter:
     filtered_df = filtered_df[filtered_df["Product"].isin(product_filter)]
 
 # --- 차트 ---
-st.markdown("### 📊 License Status Overview")
+st.subheader("📊 License Status Overview")
 status_counts = filtered_df["Status"].value_counts().reset_index()
 status_counts.columns = ["Status", "Count"]
 fig = px.pie(status_counts, names="Status", values="Count", hole=0.4)
 st.plotly_chart(fig, use_container_width=True)
 
 # --- 테이블 ---
-st.markdown("### 📋 License Table")
+st.subheader("📋 License Details Table")
 st.dataframe(filtered_df, use_container_width=True)
-
-
